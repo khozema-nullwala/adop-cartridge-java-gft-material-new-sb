@@ -4,7 +4,7 @@ def projectFolderName = "${PROJECT_NAME}"
 
 // Variables
 def projectNameKey = projectFolderName.toLowerCase().replace("/", "-")
-def referenceAppgitRepo = "java-gft-material-api-project"
+def referenceAppgitRepo = "MaterialService"
 def referenceAppGitUrl = "ssh://jenkins@gerrit:29418/${PROJECT_NAME}/" + referenceAppgitRepo
 
 // Jobs
@@ -201,7 +201,7 @@ deployJob.with {
             }
         }
         shell('''set +x
-            |export SERVICE_NAME="$(echo ${PROJECT_NAME} | tr '/' '_')_${ENVIRONMENT_NAME}"
+            |export SERVICE_NAME="$(echo ${PROJECT_NAME} | tr '/' '.').${ENVIRONMENT_NAME}"
             |docker cp ${WORKSPACE}/target/project.war  ${SERVICE_NAME}:/usr/local/tomcat/webapps/
             |docker restart ${SERVICE_NAME}
             |COUNT=1
@@ -226,18 +226,6 @@ deployJob.with {
             |echo "=.=.=.=.=.=.=.=.=.=.=.=."
             |set -x'''.stripMargin()
         )
-    }
-    publishers {
-        downstreamParameterized {
-            trigger(projectFolderName + "/Reference_Application_Regression_Tests") {
-                condition("UNSTABLE_OR_BETTER")
-                parameters {
-                    predefinedProp("B", '${B}')
-                    predefinedProp("PARENT_BUILD", '${PARENT_BUILD}')
-                    predefinedProp("ENVIRONMENT_NAME", '${ENVIRONMENT_NAME}')
-                }
-            }
-        }
     }
 }
 
